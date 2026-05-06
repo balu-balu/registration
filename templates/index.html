@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Бүртгүүлэх · Register{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <span class="badge">
+    <span class="badge-dot"></span>
+    Шинэ бүртгэл нээлттэй
+  </span>
+  <h1>Системд бүртгүүлэх</h1>
+  <p class="lead">Доорх талбаруудыг үнэн зөв бөглөнө үү. Илгээснээс хойш нэг минутад л багтаана.</p>
+</section>
+
+<section class="card form-card" id="formCard">
+  <form id="registerForm" novalidate>
+    <div class="grid">
+      <div class="field">
+        <label for="last_name">Овог</label>
+        <input id="last_name" name="last_name" type="text" autocomplete="family-name" required maxlength="64" placeholder="Жишээ: Бат-Эрдэнэ" />
+        <small class="error" data-error="last_name"></small>
+      </div>
+
+      <div class="field">
+        <label for="first_name">Нэр</label>
+        <input id="first_name" name="first_name" type="text" autocomplete="given-name" required maxlength="64" placeholder="Жишээ: Болормаа" />
+        <small class="error" data-error="first_name"></small>
+      </div>
+
+      <div class="field">
+        <label for="phone">Утасны дугаар</label>
+        <input id="phone" name="phone" type="tel" inputmode="numeric" pattern="\d{8}" required maxlength="8" placeholder="99112233" />
+        <small class="hint">8 оронтой тоо</small>
+        <small class="error" data-error="phone"></small>
+      </div>
+
+      <div class="field">
+        <label for="email">Имэйл</label>
+        <input id="email" name="email" type="email" autocomplete="email" required maxlength="128" placeholder="example@gmail.com" />
+        <small class="hint">Формат: <code>example@gmail.com</code></small>
+        <small class="error" data-error="email"></small>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" id="submitBtn">
+        <span class="btn-label">Бүртгүүлэх</span>
+        <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <p class="form-meta" id="formMeta" hidden></p>
+    </div>
+  </form>
+</section>
+
+<section class="card success-card" id="successCard" hidden>
+  <div class="success-icon" aria-hidden="true">
+    <svg width="36" height="36" viewBox="0 0 52 52">
+      <circle class="success-circle" cx="26" cy="26" r="24" fill="none" stroke-width="3"/>
+      <path class="success-check" d="M14 27 l8 8 l16 -18" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <h2>Бүртгэл амжилттай хийгдлээ</h2>
+  <p class="lead">Таны мэдээлэл системд хадгалагдлаа. Баярлалаа.</p>
+  <button type="button" class="btn btn-secondary" id="newRegBtn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    Шинэ бүртгэл хийх
+  </button>
+</section>
+
+<script>
+  (function () {
+    const form = document.getElementById('registerForm');
+    const formCard = document.getElementById('formCard');
+    const successCard = document.getElementById('successCard');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnLabel = submitBtn.querySelector('.btn-label');
+    const formMeta = document.getElementById('formMeta');
+    const newRegBtn = document.getElementById('newRegBtn');
+
+    function clearErrors() {
+      document.querySelectorAll('.error').forEach(el => el.textContent = '');
+      document.querySelectorAll('.field').forEach(el => el.classList.remove('has-error'));
+      formMeta.hidden = true;
+      formMeta.textContent = '';
+      formMeta.classList.remove('is-error');
+    }
+    function setFieldError(field, message) {
+      const el = document.querySelector(`[data-error="${field}"]`);
+      if (el) {
+        el.textContent = message;
+        el.closest('.field').classList.add('has-error');
+        const input = document.getElementById(field);
+        if (input) input.focus();
+      }
+    }
+    function setFormError(message) {
+      formMeta.textContent = message;
+      formMeta.classList.add('is-error');
+      formMeta.hidden = false;
+    }
+    function showSuccess() {
+      formCard.hidden = true;
+      successCard.hidden = false;
+      successCard.classList.remove('animate');
+      void successCard.offsetWidth;
+      successCard.classList.add('animate');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function showForm() {
+      successCard.hidden = true;
+      formCard.hidden = false;
+      form.reset();
+      clearErrors();
+      document.getElementById('last_name').focus();
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      const payload = {
+        last_name: form.last_name.value.trim(),
+        first_name: form.first_name.value.trim(),
+        phone: form.phone.value.trim(),
+        email: form.email.value.trim(),
+      };
+
+      submitBtn.disabled = true;
+      btnLabel.textContent = 'Илгээж байна...';
+      try {
+        const r = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok || !data.ok) {
+          if (data.field) setFieldError(data.field, data.message || 'Алдаа гарлаа.');
+          else setFormError(data.message || 'Бүртгэл амжилтгүй боллоо.');
+          return;
+        }
+        showSuccess();
+      } catch (err) {
+        setFormError('Сүлжээний алдаа. Дахин оролдоно уу.');
+      } finally {
+        submitBtn.disabled = false;
+        btnLabel.textContent = 'Бүртгүүлэх';
+      }
+    });
+
+    newRegBtn.addEventListener('click', showForm);
+  })();
+</script>
+{% endblock %}

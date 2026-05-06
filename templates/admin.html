@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Admin · Register{% endblock %}
+
+{% block topbar_right %}
+<span class="topbar-tag">Admin</span>
+{% endblock %}
+
+{% block content %}
+<section class="hero hero-row">
+  <div>
+    <span class="badge badge-muted">Admin Console</span>
+    <h1>Бүртгэлийн жагсаалт</h1>
+    <p class="lead">Бүртгэгдсэн хэрэглэгчдийн мэдээллийг харах болон Excel-ээр татах.</p>
+  </div>
+  <a href="{{ url_for('admin_export') }}" class="btn btn-primary btn-lg">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Excel татах</span>
+  </a>
+</section>
+
+<section class="stats">
+  <div class="stat">
+    <span class="stat-label">Нийт бүртгэл</span>
+    <span class="stat-value">{{ rows|length }}</span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Сүүлийн бүртгэл</span>
+    <span class="stat-value stat-value-sm">
+      {% if rows %}{{ rows[0]['created_at'] }}{% else %}—{% endif %}
+    </span>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Файлын формат</span>
+    <span class="stat-value stat-value-sm">.xlsx</span>
+  </div>
+</section>
+
+<section class="card table-card">
+  {% if rows %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th class="col-num">№</th>
+          <th>Овог</th>
+          <th>Нэр</th>
+          <th>Утасны дугаар</th>
+          <th>Имэйл</th>
+          <th>Огноо</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td class="muted col-num">{{ r['id'] }}</td>
+          <td class="strong">{{ r['last_name'] }}</td>
+          <td>{{ r['first_name'] }}</td>
+          <td class="mono">{{ r['phone'] }}</td>
+          <td class="mono">{{ r['email'] }}</td>
+          <td class="muted">{{ r['created_at'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <path d="M3 7l9-4 9 4M3 7v10l9 4 9-4V7M3 7l9 4m0 0l9-4m-9 4v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h3>Одоогоор бүртгэл алга</h3>
+    <p>Хэрэглэгчид бүртгүүлэх хүртэл энд хоосон байна.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

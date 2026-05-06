@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+register.db
+register.db-wal
+register.db-shm
+.test-export.xlsx
+.DS_Store
+*.log
+.vercel/
