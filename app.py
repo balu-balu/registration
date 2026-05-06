@@ -20,7 +20,13 @@ DATABASE_URL = (
 USE_PG = bool(DATABASE_URL)
 
 if USE_PG:
-    import psycopg
+    try:
+        import psycopg
+    except ImportError:
+        # psycopg not installed (e.g. Render free tier without Postgres) — fall back to SQLite.
+        USE_PG = False
+
+if USE_PG:
     PH = "%s"
     NOW_FN = "NOW()"
     PK_TYPE = "SERIAL PRIMARY KEY"
